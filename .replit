@@ -1,0 +1,39 @@
+hidden=[".config"]
+
+run = ["npm", "test"]
+
+entrypoint = ".replit"
+
+[nix]
+channel = "stable-22_11"
+
+[env]
+PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin"
+EDITOR="vim"
+NODE_NO_WARNINGS="1"
+npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global"
+npm_config_yes="true"
+NODE_OPTIONS="--max_old_space_size=384"
+
+[packager]
+language = "nodejs"
+
+  [packager.features]
+  enabledForHosting = false
+  packageSearch = true
+  guessImports = false
+
+# Todo: Currently uses mocha by default, use npm run test instead or Test Runner
+# [unitTest]
+# language = "nodejs"
+
+[languages.typescript]
+pattern = "**/{*.ts,*.js,*.tsx,*.jsx}"
+syntax = "typescript"
+ 
+  [languages.typescript.languageServer]
+  start = [ "typescript-language-server", "--stdio" ]
+
+# Todo: Default is hard coded to use index.js, without support for TS
+[debugger]
+support = false
