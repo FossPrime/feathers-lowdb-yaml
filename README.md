@@ -1,4 +1,14 @@
-# @feathersjs/memory
+# feathers-lowdb-yaml
+
+LowDB v3 for feathers cashing, development, debugging and offline-support.
+
+# Roadmap
+
+- [ ] Basic LowDB support
+- [ ] YAML support
+- [ ] JSON support
+- [ ] MongoDB compatibility mode (ObjectID's)
+- [ ] Alternative production configuration (Swap in a binary DB in prod/staging)
 
 [![CI](https://github.com/feathersjs/feathers/workflows/CI/badge.svg)](https://github.com/feathersjs/feathers/actions?query=workflow%3ACI)
 [![Download Status](https://img.shields.io/npm/dm/@feathersjs/memory.svg?style=flat-square)](https://www.npmjs.com/package/@feathersjs/memory)

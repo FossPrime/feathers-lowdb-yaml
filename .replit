@@ -1,4 +1,4 @@
-hidden=[".config"]
+hidden=[".config", ".github"]
 
 run = ["npm", "test"]
 

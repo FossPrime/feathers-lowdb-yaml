@@ -1,7 +1,7 @@
 {
-  "name": "@feathersjs/memory",
+  "name": "feathers-lowdb-yaml",
   "description": "An in memory service store",
-  "version": "5.0.1",
+  "version": "0.0.1",
   "homepage": "https://github.com/feathersjs/feathers",
   "main": "lib/",
   "types": "lib/",
