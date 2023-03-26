@@ -132,6 +132,7 @@ dist
 # Replit BS
 node_modules/
 
-# Feathers Custom
+# Feathers-LowDB Custom
 /lib
+file.yaml
 
