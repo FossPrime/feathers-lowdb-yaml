@@ -130,7 +130,7 @@ dist
 .pnp.*
 
 # Replit BS
-.package-lock.json
+node_modules/
 
 # Feathers Custom
 /lib
