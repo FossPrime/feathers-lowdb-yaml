@@ -9,7 +9,7 @@ A [Feathers](https://feathersjs.com) service adapter for YAML data storage that 
 Using LowDB v3. Good for cashing, development, debugging and offline-support.
 
 <p align="center">
-  <a href="https://replit.com/new/github/FossPrime/feathers-lowdb-yaml"><img src="https://replit.com/badge/github/feathersjs/playground" alt="Run on Repl.it"></a> 
+  <a href="https://replit.com/new/github/FossPrime/feathers-yaml"><img src="https://replit.com/badge/github/feathersjs/playground" alt="Run on Repl.it"></a> 
 </p>
 
 # Roadmap
@@ -24,10 +24,8 @@ Using LowDB v3. Good for cashing, development, debugging and offline-support.
 
 
 ```bash
-$ npm install --save @feathersjs/memory
+$ npm i feathers-yaml
 ```
-
-> **Important:** `@feathersjs/memory` implements the [Feathers Common database adapter API](https://docs.feathersjs.com/api/databases/common.html) and [querying syntax](https://docs.feathersjs.com/api/databases/querying.html).
 
 ## API
 
@@ -36,7 +34,7 @@ $ npm install --save @feathersjs/memory
 Returns a new service instance initialized with the given options.
 
 ```js
-const service = require('@feathersjs/memory')
+import { LowDBService as service } from 'feathers-yaml'
 
 app.use('/messages', service())
 app.use('/messages', service({ id, startId, store, events, paginate }))
@@ -44,6 +42,7 @@ app.use('/messages', service({ id, startId, store, events, paginate }))
 
 **Options:**
 
+- `filename` (_optional, default `/tmp/low-123-321.yaml`) - The full path to the file
 - `id` (_optional_, default: `'id'`) - The name of the id field property.
 - `startId` (_optional_, default: `0`) - An id number to start with that will be incremented for every new record (unless it is already set).
 - `store` (_optional_) - An object with id to item assignments to pre-initialize the data store
@@ -55,62 +54,7 @@ app.use('/messages', service({ id, startId, store, events, paginate }))
 
 ## Example
 
-Here is an example of a Feathers server with a `messages` in-memory service that supports pagination:
-
-```
-$ npm install @feathersjs/feathers @feathersjs/express @feathersjs/socketio @feathersjs/errors @feathersjs/memory
-```
-
-In `app.js`:
-
-```js
-const feathers = require('@feathersjs/feathers')
-const express = require('@feathersjs/express')
-const socketio = require('@feathersjs/socketio')
-
-const memory = require('@feathersjs/memory')
-
-// Create an Express compatible Feathers application instance.
-const app = express(feathers())
-// Turn on JSON parser for REST services
-app.use(express.json())
-// Turn on URL-encoded parser for REST services
-app.use(express.urlencoded({ extended: true }))
-// Enable REST services
-app.configure(express.rest())
-// Enable REST services
-app.configure(socketio())
-// Create an in-memory Feathers service with a default page size of 2 items
-// and a maximum size of 4
-app.use(
-  '/messages',
-  memory({
-    paginate: {
-      default: 2,
-      max: 4
-    }
-  })
-)
-// Set up default error handler
-app.use(express.errorHandler())
-
-// Create a dummy Message
-app
-  .service('messages')
-  .create({
-    text: 'Message created on server'
-  })
-  .then((message) => console.log('Created message', message))
-
-// Start the server.
-const port = 3030
-
-app.listen(port, () => {
-  console.log(`Feathers server listening on port ${port}`)
-})
-```
-
-Run the example with `node app` and go to [localhost:3030/messages](http://localhost:3030/messages).
+_Todo_
 
 ## License
 
