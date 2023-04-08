@@ -2,7 +2,7 @@
   "name": "feathers-yaml",
   "description": "An in memory service store",
   "type": "module",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "homepage": "https://github.com/feathersjs/feathers",
   "main": "lib/src",
   "types": "lib/src",
@@ -58,7 +58,7 @@
     "@feathersjs/errors": "^5.0.3",
     "lowdb": "^5.1.0",
     "sift": "^17.0.1",
-    "tsx": "^3.12.6"
+    "yaml": "^2.2.1"
   },
   "devDependencies": {
     "@feathersjs/adapter-tests": "^5.0.3",
@@ -69,8 +69,7 @@
     "shx": "^0.3.4",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4",
-    "yaml": "^2.2.1"
+    "typescript": "^5.0.4"
   },
   "gitHead": "90caf635aec850550b9d37bea2762af959d9e8d5"
 }
