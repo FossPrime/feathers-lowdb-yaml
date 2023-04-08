@@ -13,7 +13,7 @@ EDITOR="vim"
 NODE_NO_WARNINGS="1"
 npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global"
 npm_config_yes="true"
-NODE_OPTIONS="--max_old_space_size=384"
+NODE_OPTIONS="--max_old_space_size=384 --loader ts-node/esm"
 
 [packager]
 language = "nodejs"

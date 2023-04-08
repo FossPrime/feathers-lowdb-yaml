@@ -38,10 +38,12 @@
     "*.js"
   ],
   "scripts": {
-    "nbh-prepublish": "npm run compile",
-    "nbh-pack": "npm pack --pack-destination ../generators/test/build",
-    "nbh-compile": "shx rm -rf lib/ && tsc && npm run pack",
-    "test": "mocha --config .mocharc.json --recursive test/**/*.test.ts"
+    "prepublish": "npm run compile",
+    "pack": "echo 'Skipping pack.'",
+    "upstream-pack": "npm pack --pack-destination ../generators/test/build",
+    "compile": "shx rm -rf lib/ && tsc && npm run pack",
+    "test": "mocha --config .mocharc.json --recursive test/**/*.test.ts",
+    "example-vanilla": "ts-node --esm examples/vanilla.ts"
   },
   "publishConfig": {
     "access": "public"
@@ -53,9 +55,9 @@
     "@feathersjs/adapter-commons": "^5.0.1",
     "@feathersjs/commons": "^5.0.1",
     "@feathersjs/errors": "^5.0.1",
+    "lowdb": "^5.1.0",
     "sift": "^17.0.1",
-    "tsx": "^3.12.6",
-    "lowdb": "^5.1.0"
+    "tsx": "^3.12.6"
   },
   "devDependencies": {
     "@feathersjs/adapter-tests": "^5.0.1",
@@ -64,6 +66,7 @@
     "@types/node": "^18.14.6",
     "mocha": "^10.2.0",
     "shx": "^0.3.4",
+    "source-map-support": "^0.5.21",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "yaml": "^2.2.1"
