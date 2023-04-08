@@ -3,9 +3,9 @@ import adapterTests from '@feathersjs/adapter-tests'
 import errors from '@feathersjs/errors'
 import { feathers } from '@feathersjs/feathers'
 
-import { MemoryService } from '../src'
+import { MemoryService } from '../src/index.js'
 
-const testSuite = adapterTests([
+const testSuite = (typeof adapterTests === 'function' ? adapterTests : adapterTests.default)([
   '.options',
   '.events',
   '._get',

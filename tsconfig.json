@@ -1,9 +1,13 @@
 {
   "extends": "./tsconfig-base",
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "examples/**/*.ts"
   ],
   "compilerOptions": {
-    "outDir": "lib"    
+    "outDir": "lib",
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
   }
 }

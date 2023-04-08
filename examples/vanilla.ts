@@ -1,10 +1,12 @@
 // From https://github.com/typicode/lowdb#custom-serialization
-import { Adapter, Low } from 'lowdb'
+import { Low } from 'lowdb'
 import { TextFile } from 'lowdb/node'
 import YAML from 'yaml'
 
 class YAMLFile {
-  constructor(filename) {
+  adapter: TextFile;
+  
+  constructor(filename: string) {
     this.adapter = new TextFile(filename)
   }
 
@@ -17,7 +19,7 @@ class YAMLFile {
     }
   }
 
-  write(obj) {
+  write(obj: Record<string, any>) {
     return this.adapter.write(YAML.stringify(obj))
   }
 }
@@ -37,11 +39,11 @@ db.data ||= { posts: [] }             // For Node >= 15.x
 
 // Create and query items using native JS API
 db.data.posts.push('hello world')
-const firstPost = db.data.posts[0]
+// const firstPost = db.data.posts[0]
 
 // Alternatively, you can also use this syntax if you prefer
 const { posts } = db.data
-posts.push('hello world')
+posts.push('hello world ' + (new Date()).toISOString())
 
 // Finally write db.data content to file
 await db.write()

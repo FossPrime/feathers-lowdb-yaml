@@ -38,9 +38,9 @@
     "*.js"
   ],
   "scripts": {
-    "prepublish": "npm run compile",
-    "pack": "npm pack --pack-destination ../generators/test/build",
-    "compile": "shx rm -rf lib/ && tsc && npm run pack",
+    "nbh-prepublish": "npm run compile",
+    "nbh-pack": "npm pack --pack-destination ../generators/test/build",
+    "nbh-compile": "shx rm -rf lib/ && tsc && npm run pack",
     "test": "mocha --config .mocharc.json --recursive test/**/*.test.ts"
   },
   "publishConfig": {
@@ -54,18 +54,18 @@
     "@feathersjs/commons": "^5.0.1",
     "@feathersjs/errors": "^5.0.1",
     "sift": "^17.0.1",
-    "tsx": "^3.12.6"
+    "tsx": "^3.12.6",
+    "lowdb": "^5.1.0"
   },
   "devDependencies": {
     "@feathersjs/adapter-tests": "^5.0.1",
     "@feathersjs/feathers": "^5.0.1",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.14.6",
-    "lowdb": "^5.1.0",
     "mocha": "^10.2.0",
     "shx": "^0.3.4",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5",
+    "typescript": "^5.0.4",
     "yaml": "^2.2.1"
   },
   "gitHead": "90caf635aec850550b9d37bea2762af959d9e8d5"

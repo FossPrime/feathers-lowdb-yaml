@@ -40,7 +40,7 @@ export class MemoryAdapter<
   constructor(options: MemoryServiceOptions<Result> = {}) {
     super({
       id: 'id',
-      matcher: sift,
+      matcher: sift.default,
       sorter,
       store: {},
       startId: 0,
