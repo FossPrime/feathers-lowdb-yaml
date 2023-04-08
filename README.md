@@ -4,8 +4,10 @@ LowDB v3 for feathers cashing, development, debugging and offline-support.
 
 # Roadmap
 
-- [ ] Basic LowDB support
-- [ ] YAML support
+- [x] Basic LowDB support
+- [x] YAML support
+- [ ] Rename service and adapter
+- [ ] Publish to NPM
 - [ ] JSON support
 - [ ] MongoDB compatibility mode (ObjectID's)
 - [ ] Alternative production configuration (Swap in a binary DB in prod/staging)
