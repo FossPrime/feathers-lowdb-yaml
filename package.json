@@ -1,5 +1,5 @@
 {
-  "name": "feathers-lowdb-yaml",
+  "name": "feathers-yaml",
   "description": "An in memory service store",
   "type": "module",
   "version": "0.10.0",
