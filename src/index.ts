@@ -6,7 +6,7 @@ import {
   AdapterBase,
   AdapterServiceOptions,
   PaginationOptions,
-  AdapterParams
+  AdapterParams,
 } from '@feathersjs/adapter-commons'
 import sift from 'sift'
 import { NullableId, Id, Params, Paginated } from '@feathersjs/feathers'
@@ -15,22 +15,21 @@ import { TextFile } from 'lowdb/node'
 import YAML from 'yaml'
 import { tmpdir } from 'node:os'
 
-export interface MemoryServiceStore<T> {
+export interface LowDBServiceStore<T> {
   [key: string]: T
 }
 
-export interface MemoryServiceOptions<T = any> extends AdapterServiceOptions {
-  filename?: string,
-  store?: MemoryServiceStore<T>
+export interface LowDBServiceOptions<T = any> extends AdapterServiceOptions {
+  filename?: string
+  store?: LowDBServiceStore<T>
   startId?: number
   matcher?: (query: any) => any
   sorter?: (sort: any) => any
 }
 
-
 export class YAMLFile {
-  adapter: TextFile;
-  
+  adapter: TextFile
+
   constructor(filename: string) {
     this.adapter = new TextFile(filename)
   }
@@ -55,31 +54,41 @@ const _select = (data: any, params: any, ...args: string[]) => {
   return base(JSON.parse(JSON.stringify(data)))
 }
 
-export class MemoryAdapter<
+export class LowDBAdapter<
   Result = any,
   Data = Partial<Result>,
   ServiceParams extends Params = Params,
   PatchData = Partial<Data>
-> extends AdapterBase<Result, Data, PatchData, ServiceParams, MemoryServiceOptions<Result>> {
-  // store: MemoryServiceStore<Result>
-  adapter: YAMLFile
+> extends AdapterBase<
+  Result,
+  Data,
+  PatchData,
+  ServiceParams,
+  LowDBServiceOptions<Result>
+> {
+  // store: LowDBServiceStore<Result>
+  model: YAMLFile
   _uId: number
   filename: string // Probably unnecesary
   db: Low<Record<string, any>>
 
-  constructor(options: MemoryServiceOptions<Result> = {}) {
+  constructor(options: LowDBServiceOptions<Result> = {}) {
     super({
       id: 'id',
       matcher: sift.default,
       sorter,
       // store: {},
       startId: 0,
-      ...options
+      ...options,
     })
     this._uId = this.options.startId
-    this.filename = this.options.filename || `${tmpdir()}/low-${(new Date()).toISOString()}-${Math.random() * 9**9 | 0}.yaml`
-    this.adapter = new YAMLFile(this.filename)
-    this.db = new Low(this.adapter)
+    this.filename =
+      this.options.filename ||
+      `${tmpdir()}/low-${new Date().toISOString()}-${
+        (Math.random() * 9 ** 9) | 0
+      }.yaml`
+    this.model = new YAMLFile(this.filename)
+    this.db = new Low(this.model)
     // this.store = { ...this.options.store }
   }
 
@@ -95,7 +104,7 @@ export class MemoryAdapter<
 
     return this._find({
       ...params,
-      paginate: false
+      paginate: false,
     })
   }
 
@@ -104,14 +113,18 @@ export class MemoryAdapter<
 
     return {
       query,
-      filters: { $skip, $sort, $limit, $select }
+      filters: { $skip, $sort, $limit, $select },
     }
   }
 
-  async _find(_params?: ServiceParams & { paginate?: PaginationOptions }): Promise<Paginated<Result>>
+  async _find(
+    _params?: ServiceParams & { paginate?: PaginationOptions }
+  ): Promise<Paginated<Result>>
   async _find(_params?: ServiceParams & { paginate: false }): Promise<Result[]>
   async _find(_params?: ServiceParams): Promise<Paginated<Result> | Result[]>
-  async _find(params: ServiceParams = {} as ServiceParams): Promise<Paginated<Result> | Result[]> {
+  async _find(
+    params: ServiceParams = {} as ServiceParams
+  ): Promise<Paginated<Result> | Result[]> {
     await this.load()
     const { paginate } = this.getOptions(params)
     const { query, filters } = this.getQuery(params)
@@ -160,7 +173,7 @@ export class MemoryAdapter<
       total: hasQuery ? values.length : total,
       limit: filters.$limit,
       skip: filters.$skip || 0,
-      data: filters.$limit === 0 ? [] : values
+      data: filters.$limit === 0 ? [] : values,
     }
 
     if (!paginate) {
@@ -170,7 +183,10 @@ export class MemoryAdapter<
     return result
   }
 
-  async _get(id: Id, params: ServiceParams = {} as ServiceParams): Promise<Result> {
+  async _get(
+    id: Id,
+    params: ServiceParams = {} as ServiceParams
+  ): Promise<Result> {
     await this.load()
     const { query } = this.getQuery(params)
 
@@ -186,8 +202,14 @@ export class MemoryAdapter<
   }
 
   async _create(data: Partial<Data>, params?: ServiceParams): Promise<Result>
-  async _create(data: Partial<Data>[], params?: ServiceParams): Promise<Result[]>
-  async _create(data: Partial<Data> | Partial<Data>[], _params?: ServiceParams): Promise<Result | Result[]>
+  async _create(
+    data: Partial<Data>[],
+    params?: ServiceParams
+  ): Promise<Result[]>
+  async _create(
+    data: Partial<Data> | Partial<Data>[],
+    _params?: ServiceParams
+  ): Promise<Result | Result[]>
   async _create(
     data: Partial<Data> | Partial<Data>[],
     params: ServiceParams = {} as ServiceParams
@@ -210,15 +232,21 @@ export class MemoryAdapter<
     } else {
       result = createEntry(data, params)
     }
-    
+
     await this.db.write()
     return result
   }
 
-  async _update(id: Id, data: Data, params: ServiceParams = {} as ServiceParams): Promise<Result> {
+  async _update(
+    id: Id,
+    data: Data,
+    params: ServiceParams = {} as ServiceParams
+  ): Promise<Result> {
     await this.load()
     if (id === null || Array.isArray(data)) {
-      throw new BadRequest("You can not replace multiple instances. Did you mean 'patch'?")
+      throw new BadRequest(
+        "You can not replace multiple instances. Did you mean 'patch'?"
+      )
     }
 
     const oldEntry = await this._get(id)
@@ -230,14 +258,22 @@ export class MemoryAdapter<
 
     const result = _.extend({}, data, { [this.id]: id })
     this.db.data[id] = result
-    
+
     await this.db.write()
     return this._get(id, params)
   }
 
-  async _patch(id: null, data: PatchData, params?: ServiceParams): Promise<Result[]>
+  async _patch(
+    id: null,
+    data: PatchData,
+    params?: ServiceParams
+  ): Promise<Result[]>
   async _patch(id: Id, data: PatchData, params?: ServiceParams): Promise<Result>
-  async _patch(id: NullableId, data: PatchData, _params?: ServiceParams): Promise<Result | Result[]>
+  async _patch(
+    id: NullableId,
+    data: PatchData,
+    _params?: ServiceParams
+  ): Promise<Result | Result[]>
   async _patch(
     id: NullableId,
     data: PatchData,
@@ -252,7 +288,10 @@ export class MemoryAdapter<
     const patchEntry = async (entry: Result) => {
       const currentId = (entry as any)[this.id]
 
-      this.db.data[currentId] = _.extend(this.db.data[currentId], _.omit(data, this.id))
+      this.db.data[currentId] = _.extend(
+        this.db.data[currentId],
+        _.omit(data, this.id)
+      )
 
       return _select(this.db.data[currentId], params, this.id)
     }
@@ -260,9 +299,9 @@ export class MemoryAdapter<
     if (id === null) {
       const entries = await this.getEntries({
         ...params,
-        query
+        query,
       })
-      const result = Promise.all(entries.map(patchEntry)) 
+      const result = Promise.all(entries.map(patchEntry))
       await this.db.write()
       return result
     }
@@ -274,8 +313,14 @@ export class MemoryAdapter<
 
   async _remove(id: null, params?: ServiceParams): Promise<Result[]>
   async _remove(id: Id, params?: ServiceParams): Promise<Result>
-  async _remove(id: NullableId, _params?: ServiceParams): Promise<Result | Result[]>
-  async _remove(id: NullableId, params: ServiceParams = {} as ServiceParams): Promise<Result | Result[]> {
+  async _remove(
+    id: NullableId,
+    _params?: ServiceParams
+  ): Promise<Result | Result[]>
+  async _remove(
+    id: NullableId,
+    params: ServiceParams = {} as ServiceParams
+  ): Promise<Result | Result[]> {
     await this.load()
     if (id === null && !this.allowsMulti('remove', params)) {
       throw new MethodNotAllowed('Can not remove multiple entries')
@@ -286,10 +331,14 @@ export class MemoryAdapter<
     if (id === null) {
       const entries = await this.getEntries({
         ...params,
-        query
+        query,
       })
 
-      return Promise.all(entries.map((current: any) => this._remove(current[this.id] as Id, params)))
+      return Promise.all(
+        entries.map((current: any) =>
+          this._remove(current[this.id] as Id, params)
+        )
+      )
     }
 
     const entry = await this._get(id, params)
@@ -300,32 +349,37 @@ export class MemoryAdapter<
   }
 }
 
-export class MemoryService<
+export class LowDBService<
   Result = any,
   Data = Partial<Result>,
   ServiceParams extends AdapterParams = AdapterParams,
   PatchData = Partial<Data>
-> extends MemoryAdapter<Result, Data, ServiceParams, PatchData> {
-  async find(params?: ServiceParams & { paginate?: PaginationOptions }): Promise<Paginated<Result>>
+> extends LowDBAdapter<Result, Data, ServiceParams, PatchData> {
+  async find(
+    params?: ServiceParams & { paginate?: PaginationOptions }
+  ): Promise<Paginated<Result>>
   async find(params?: ServiceParams & { paginate: false }): Promise<Result[]>
   async find(params?: ServiceParams): Promise<Paginated<Result> | Result[]>
   async find(params?: ServiceParams): Promise<Paginated<Result> | Result[]> {
     return this._find({
       ...params,
-      query: await this.sanitizeQuery(params)
+      query: await this.sanitizeQuery(params),
     })
   }
 
   async get(id: Id, params?: ServiceParams): Promise<Result> {
     return this._get(id, {
       ...params,
-      query: await this.sanitizeQuery(params)
+      query: await this.sanitizeQuery(params),
     })
   }
 
   async create(data: Data, params?: ServiceParams): Promise<Result>
   async create(data: Data[], params?: ServiceParams): Promise<Result[]>
-  async create(data: Data | Data[], params?: ServiceParams): Promise<Result | Result[]> {
+  async create(
+    data: Data | Data[],
+    params?: ServiceParams
+  ): Promise<Result | Result[]> {
     if (Array.isArray(data) && !this.allowsMulti('create', params)) {
       throw new MethodNotAllowed('Can not create multiple entries')
     }
@@ -336,35 +390,46 @@ export class MemoryService<
   async update(id: Id, data: Data, params?: ServiceParams): Promise<Result> {
     return this._update(id, data, {
       ...params,
-      query: await this.sanitizeQuery(params)
+      query: await this.sanitizeQuery(params),
     })
   }
 
   async patch(id: Id, data: PatchData, params?: ServiceParams): Promise<Result>
-  async patch(id: null, data: PatchData, params?: ServiceParams): Promise<Result[]>
-  async patch(id: NullableId, data: PatchData, params?: ServiceParams): Promise<Result | Result[]> {
+  async patch(
+    id: null,
+    data: PatchData,
+    params?: ServiceParams
+  ): Promise<Result[]>
+  async patch(
+    id: NullableId,
+    data: PatchData,
+    params?: ServiceParams
+  ): Promise<Result | Result[]> {
     const { $limit, ...query } = await this.sanitizeQuery(params)
 
     return this._patch(id, data, {
       ...params,
-      query
+      query,
     })
   }
 
   async remove(id: Id, params?: ServiceParams): Promise<Result>
   async remove(id: null, params?: ServiceParams): Promise<Result[]>
-  async remove(id: NullableId, params?: ServiceParams): Promise<Result | Result[]> {
+  async remove(
+    id: NullableId,
+    params?: ServiceParams
+  ): Promise<Result | Result[]> {
     const { $limit, ...query } = await this.sanitizeQuery(params)
 
     return this._remove(id, {
       ...params,
-      query
+      query,
     })
   }
 }
 
 export function memory<T = any, D = Partial<T>, P extends Params = Params>(
-  options: Partial<MemoryServiceOptions<T>> = {}
+  options: Partial<LowDBServiceOptions<T>> = {}
 ) {
-  return new MemoryService<T, D, P>(options)
+  return new LowDBService<T, D, P>(options)
 }

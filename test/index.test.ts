@@ -3,9 +3,11 @@ import adapterTests from '@feathersjs/adapter-tests'
 import errors from '@feathersjs/errors'
 import { feathers } from '@feathersjs/feathers'
 
-import { MemoryService } from '../src/index.js'
+import { LowDBService } from '../src/index.js'
 
-const testSuite = (typeof adapterTests === 'function' ? adapterTests : adapterTests.default)([
+const testSuite = (
+  typeof adapterTests === 'function' ? adapterTests : adapterTests.default
+)([
   '.options',
   '.events',
   '._get',
@@ -75,7 +77,7 @@ const testSuite = (typeof adapterTests === 'function' ? adapterTests : adapterTe
   '.find + paginate + $limit 0',
   '.find + paginate + params',
   'params.adapter + paginate',
-  'params.adapter + multi'
+  'params.adapter + multi',
 ])
 
 describe('Feathers Memory Service', () => {
@@ -92,18 +94,18 @@ describe('Feathers Memory Service', () => {
 
   const events = ['testing']
   const app = feathers<{
-    people: MemoryService<Person>
-    'people-customid': MemoryService<Person>
-    animals: MemoryService<Animal>
-    matcher: MemoryService
+    people: LowDBService<Person>
+    'people-customid': LowDBService<Person>
+    animals: LowDBService<Animal>
+    matcher: LowDBService
   }>()
 
-  app.use('people', new MemoryService<Person>({ events }))
+  app.use('people', new LowDBService<Person>({ events }))
   app.use(
     'people-customid',
-    new MemoryService<Person>({
+    new LowDBService<Person>({
       id: 'customid',
-      events
+      events,
     })
   )
 
@@ -111,7 +113,7 @@ describe('Feathers Memory Service', () => {
     const people = app.service('people')
     const person = await people.create({
       name: 'Tester',
-      age: 33
+      age: 33,
     })
 
     const updatedPerson: any = await people.update(person.id.toString(), person)
@@ -122,20 +124,24 @@ describe('Feathers Memory Service', () => {
   })
 
   it('patch record with prop also in query', async () => {
-    app.use('animals', new MemoryService<Animal>({ multi: true }))
+    app.use('animals', new LowDBService<Animal>({ multi: true }))
     const animals = app.service('animals')
     await animals.create([
       {
         type: 'cat',
-        age: 30
+        age: 30,
       },
       {
         type: 'dog',
-        age: 10
-      }
+        age: 10,
+      },
     ])
 
-    const [updated] = await animals.patch(null, { age: 40 }, { query: { age: 30 } })
+    const [updated] = await animals.patch(
+      null,
+      { age: 40 },
+      { query: { age: 30 } }
+    )
 
     assert.strictEqual(updated.age, 40)
 
@@ -148,7 +154,7 @@ describe('Feathers Memory Service', () => {
 
     app.use(
       'matcher',
-      new MemoryService({
+      new LowDBService({
         matcher() {
           matcherCalled = true
           return function () {
@@ -161,12 +167,12 @@ describe('Feathers Memory Service', () => {
           return function () {
             return 0
           }
-        }
+        },
       })
     )
 
     await app.service('matcher').find({
-      query: { something: 1, $sort: { something: 1 } }
+      query: { something: 1, $sort: { something: 1 } },
     })
 
     assert.ok(sorterCalled, 'sorter called')
@@ -178,7 +184,7 @@ describe('Feathers Memory Service', () => {
 
     const person = await people.create({
       name: 'Delete tester',
-      age: 33
+      age: 33,
     })
 
     delete person.age
@@ -195,7 +201,10 @@ describe('Feathers Memory Service', () => {
       await app.service('people').update(null, {})
       throw new Error('Should never get here')
     } catch (error: any) {
-      assert.strictEqual(error.message, "You can not replace multiple instances. Did you mean 'patch'?")
+      assert.strictEqual(
+        error.message,
+        "You can not replace multiple instances. Did you mean 'patch'?"
+      )
     }
   })
 
@@ -203,14 +212,14 @@ describe('Feathers Memory Service', () => {
     const people = app.service('people')
     const person = await people.create({
       name: 'Tester',
-      age: 42
+      age: 42,
     })
 
     const results = await people.find({
       paginate: false,
       query: {
-        $select: ['name']
-      }
+        $select: ['name'],
+      },
     })
 
     assert.deepStrictEqual(results[0], { id: person.id, name: 'Tester' })
