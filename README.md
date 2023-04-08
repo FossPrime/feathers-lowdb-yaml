@@ -1,7 +1,7 @@
 # feathers-lowdb-yaml
 
 
-[![CI](https://github.com/FossPrime/feathers-lowdb-yaml/workflows/CI/badge.svg)](https://github.com/FossPrime/feathers-lowdb-yaml/actions?query=workflow%3ACI)
+[![Node.js CI](https://github.com/FossPrime/feathers-lowdb-yaml/actions/workflows/Node18.yaml/badge.svg)](https://github.com/FossPrime/feathers-lowdb-yaml/actions/workflows/Node18.yaml)
 [![Download Status](https://img.shields.io/npm/dm/@feathersjs/memory.svg?style=flat-square)](https://www.npmjs.com/package/@feathersjs/memory)
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/qa8kez8QBx)
 
