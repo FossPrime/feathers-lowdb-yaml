@@ -1,4 +1,4 @@
-hidden=[".config", ".github"]
+hidden=[".config", ".github", ".npmrc", "tsconfig-base.json", ".mocharc.json", ".gitignore", "package-lock.json"]
 
 compile=["npm", "i"]
 run = ["npm", "test"]
