@@ -10,16 +10,43 @@ import {
 } from '@feathersjs/adapter-commons'
 import sift from 'sift'
 import { NullableId, Id, Params, Paginated } from '@feathersjs/feathers'
+import { Low } from 'lowdb'
+import { TextFile } from 'lowdb/node'
+import YAML from 'yaml'
+import { tmpdir } from 'node:os'
 
 export interface MemoryServiceStore<T> {
   [key: string]: T
 }
 
 export interface MemoryServiceOptions<T = any> extends AdapterServiceOptions {
+  filename?: string,
   store?: MemoryServiceStore<T>
   startId?: number
   matcher?: (query: any) => any
   sorter?: (sort: any) => any
+}
+
+
+export class YAMLFile {
+  adapter: TextFile;
+  
+  constructor(filename: string) {
+    this.adapter = new TextFile(filename)
+  }
+
+  async read() {
+    const data = await this.adapter.read()
+    if (data === null) {
+      return null
+    } else {
+      return YAML.parse(data)
+    }
+  }
+
+  write(obj: Record<string, any>) {
+    return this.adapter.write(YAML.stringify(obj))
+  }
 }
 
 const _select = (data: any, params: any, ...args: string[]) => {
@@ -35,7 +62,10 @@ export class MemoryAdapter<
   PatchData = Partial<Data>
 > extends AdapterBase<Result, Data, PatchData, ServiceParams, MemoryServiceOptions<Result>> {
   store: MemoryServiceStore<Result>
+  adapter: YAMLFile
   _uId: number
+  filename: string // Probably unnecesary
+  db: Low<Record<string, any>>
 
   constructor(options: MemoryServiceOptions<Result> = {}) {
     super({
@@ -47,6 +77,9 @@ export class MemoryAdapter<
       ...options
     })
     this._uId = this.options.startId
+    this.filename = this.options.filename || `${tmpdir()}/${(new Date()).toISOString()}-${Math.random() * 9**9 | 0}.yaml`
+    this.adapter = new YAMLFile(this.filename)
+    this.db = new Low(this.adapter)
     this.store = { ...this.options.store }
   }
 
@@ -158,6 +191,11 @@ export class MemoryAdapter<
     const current = _.extend({}, data, { [this.id]: id })
     const result = (this.store[id] = current)
 
+    await this.db.read()
+    this.db.data ||= {}
+    this.db.data[id] = current
+    await this.db.write()
+    
     return _select(result, params, this.id) as Result
   }
 
