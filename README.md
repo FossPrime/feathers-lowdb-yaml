@@ -29,15 +29,24 @@ $ npm i feathers-yaml
 
 ## API
 
-### `service([options])`
+### `yaml([options])`
 
-Returns a new service instance initialized with the given options.
+Returns a new database instance initialized with the given options.
 
 ```js
-import { LowDBService as service } from 'feathers-yaml'
+import { yaml as database } from 'feathers-yaml'
 
-app.use('/messages', service())
-app.use('/messages', service({ id, startId, store, events, paginate }))
+export const createModel = (app: Application) => {
+  return database({
+    filename: 'users.yaml',
+    id: '_id', // todo: https://github.com/feathersjs/feathers/issues/2839
+    startId: 1,
+    paginate: {
+      default: 2,
+      max: 4
+    }
+  })
+}
 ```
 
 **Options:**
