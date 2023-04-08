@@ -16,8 +16,8 @@ Using LowDB v3. Good for cashing, development, debugging and offline-support.
 
 - [x] Basic LowDB support
 - [x] YAML support
-- [ ] Rename service and adapter
-- [ ] Publish to NPM
+- [x] Rename service and adapter
+- [x] Publish to NPM
 - [ ] JSON support
 - [ ] MongoDB compatibility mode (ObjectID's)
 - [ ] Alternative production configuration (Swap in a binary DB in prod/staging)
