@@ -9,7 +9,7 @@ A [Feathers](https://feathersjs.com) service adapter for YAML data storage that 
 Using LowDB v3. Good for cashing, development, debugging and offline-support.
 
 <p align="center">
-  <a href="https://replit.com/new/github/feathersjs/playground"><img src="https://replit.com/badge/github/feathersjs/playground" alt="Run on Repl.it"></a> 
+  <a href="https://replit.com/new/github/FossPrime/feathers-lowdb-yaml"><img src="https://replit.com/badge/github/feathersjs/playground" alt="Run on Repl.it"></a> 
 </p>
 
 # Roadmap
