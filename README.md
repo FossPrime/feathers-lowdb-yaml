@@ -1,6 +1,16 @@
 # feathers-lowdb-yaml
 
-LowDB v3 for feathers cashing, development, debugging and offline-support.
+
+[![CI](https://github.com/FossPrime/feathers-lowdb-yaml/workflows/CI/badge.svg)](https://github.com//FossPrime/feathers-lowdb-yaml/actions?query=workflow%3ACI)
+[![Download Status](https://img.shields.io/npm/dm/@feathersjs/memory.svg?style=flat-square)](https://www.npmjs.com/package/@feathersjs/memory)
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/qa8kez8QBx)
+
+A [Feathers](https://feathersjs.com) service adapter for YAML data storage that works on all platforms.
+Using LowDB v3. Good for cashing, development, debugging and offline-support.
+
+<p align="center">
+  <a href="https://replit.com/new/github/feathersjs/playground"><img src="https://replit.com/badge/github/feathersjs/playground" alt="Run on Repl.it"></a> 
+</p>
 
 # Roadmap
 
@@ -12,11 +22,6 @@ LowDB v3 for feathers cashing, development, debugging and offline-support.
 - [ ] MongoDB compatibility mode (ObjectID's)
 - [ ] Alternative production configuration (Swap in a binary DB in prod/staging)
 
-[![CI](https://github.com/feathersjs/feathers/workflows/CI/badge.svg)](https://github.com/feathersjs/feathers/actions?query=workflow%3ACI)
-[![Download Status](https://img.shields.io/npm/dm/@feathersjs/memory.svg?style=flat-square)](https://www.npmjs.com/package/@feathersjs/memory)
-[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/qa8kez8QBx)
-
-A [Feathers](https://feathersjs.com) service adapter for in-memory data storage that works on all platforms.
 
 ```bash
 $ npm install --save @feathersjs/memory
