@@ -42,7 +42,7 @@
     "pack": "echo 'Skipping pack.'",
     "upstream-pack": "npm pack --pack-destination ../generators/test/build",
     "compile": "shx rm -rf lib/ && tsc && npm run pack",
-    "test": "mocha --config .mocharc.json --recursive test/**/*.test.ts",
+    "test": "NODE_OPTIONS='--loader ts-node/esm' mocha --config .mocharc.json --recursive test/**/*.test.ts",
     "example-vanilla": "ts-node --esm examples/vanilla.ts"
   },
   "publishConfig": {
@@ -52,16 +52,16 @@
     "lib": "lib"
   },
   "dependencies": {
-    "@feathersjs/adapter-commons": "^5.0.1",
-    "@feathersjs/commons": "^5.0.1",
-    "@feathersjs/errors": "^5.0.1",
+    "@feathersjs/adapter-commons": "^5.0.3",
+    "@feathersjs/commons": "^5.0.3",
+    "@feathersjs/errors": "^5.0.3",
     "lowdb": "^5.1.0",
     "sift": "^17.0.1",
     "tsx": "^3.12.6"
   },
   "devDependencies": {
-    "@feathersjs/adapter-tests": "^5.0.1",
-    "@feathersjs/feathers": "^5.0.1",
+    "@feathersjs/adapter-tests": "^5.0.3",
+    "@feathersjs/feathers": "^5.0.3",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.14.6",
     "mocha": "^10.2.0",

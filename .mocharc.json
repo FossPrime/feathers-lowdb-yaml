@@ -3,7 +3,5 @@
   "require": ["ts-node/register", "source-map-support/register.js"],
   "reporter": "Dot",
   "extension": ".test.ts",
-  "exit": true,
-  "loader": "tsx",
-  "x-loader": "ts-node/esm"
+  "exit": true
 }
