@@ -61,7 +61,7 @@ export class MemoryAdapter<
   ServiceParams extends Params = Params,
   PatchData = Partial<Data>
 > extends AdapterBase<Result, Data, PatchData, ServiceParams, MemoryServiceOptions<Result>> {
-  store: MemoryServiceStore<Result>
+  // store: MemoryServiceStore<Result>
   adapter: YAMLFile
   _uId: number
   filename: string // Probably unnecesary
@@ -72,7 +72,7 @@ export class MemoryAdapter<
       id: 'id',
       matcher: sift.default,
       sorter,
-      store: {},
+      // store: {},
       startId: 0,
       ...options
     })
@@ -80,7 +80,14 @@ export class MemoryAdapter<
     this.filename = this.options.filename || `${tmpdir()}/low-${(new Date()).toISOString()}-${Math.random() * 9**9 | 0}.yaml`
     this.adapter = new YAMLFile(this.filename)
     this.db = new Low(this.adapter)
-    this.store = { ...this.options.store }
+    // this.store = { ...this.options.store }
+  }
+
+  async load() {
+    if (this.db.data === null) {
+      await this.db.read()
+      this.db.data ||= {}
+    }
   }
 
   async getEntries(_params?: ServiceParams) {
@@ -105,10 +112,11 @@ export class MemoryAdapter<
   async _find(_params?: ServiceParams & { paginate: false }): Promise<Result[]>
   async _find(_params?: ServiceParams): Promise<Paginated<Result> | Result[]>
   async _find(params: ServiceParams = {} as ServiceParams): Promise<Paginated<Result> | Result[]> {
+    await this.load()
     const { paginate } = this.getOptions(params)
     const { query, filters } = this.getQuery(params)
 
-    let values = _.values(this.store)
+    let values = _.values(this.db.data)
     const total = values.length
     const hasSkip = filters.$skip !== undefined
     const hasSort = filters.$sort !== undefined
@@ -163,10 +171,11 @@ export class MemoryAdapter<
   }
 
   async _get(id: Id, params: ServiceParams = {} as ServiceParams): Promise<Result> {
+    await this.load()
     const { query } = this.getQuery(params)
 
-    if (id in this.store) {
-      const value = this.store[id]
+    if (id in this.db.data) {
+      const value = this.db.data[id]
 
       if (this.options.matcher(query)(value)) {
         return _select(value, params, this.id)
@@ -183,23 +192,31 @@ export class MemoryAdapter<
     data: Partial<Data> | Partial<Data>[],
     params: ServiceParams = {} as ServiceParams
   ): Promise<Result | Result[]> {
-    if (Array.isArray(data)) {
-      return Promise.all(data.map((current) => this._create(current, params)))
+    await this.load()
+    const createEntry = async (
+      data: Partial<Data> | Partial<Data>[],
+      params: ServiceParams = {} as ServiceParams
+    ): Promise<Result> => {
+      const id = (data as any)[this.id] || this._uId++
+      const current = _.extend({}, data, { [this.id]: id })
+      this.db.data[id] = current
+
+      return _select(current, params, this.id) as Result
     }
 
-    const id = (data as any)[this.id] || this._uId++
-    const current = _.extend({}, data, { [this.id]: id })
-    const result = (this.store[id] = current)
-
-    await this.db.read()
-    this.db.data ||= {}
-    this.db.data[id] = current
-    await this.db.write()
+    let result = null
+    if (Array.isArray(data)) {
+      result = Promise.all(data.map((e) => createEntry(e, params)))
+    } else {
+      result = createEntry(data, params)
+    }
     
-    return _select(result, params, this.id) as Result
+    await this.db.write()
+    return result
   }
 
   async _update(id: Id, data: Data, params: ServiceParams = {} as ServiceParams): Promise<Result> {
+    await this.load()
     if (id === null || Array.isArray(data)) {
       throw new BadRequest("You can not replace multiple instances. Did you mean 'patch'?")
     }
@@ -211,8 +228,10 @@ export class MemoryAdapter<
     // eslint-disable-next-line eqeqeq
     id = oldId == id ? oldId : id
 
-    this.store[id] = _.extend({}, data, { [this.id]: id })
-
+    const result = _.extend({}, data, { [this.id]: id })
+    this.db.data[id] = result
+    
+    await this.db.write()
     return this._get(id, params)
   }
 
@@ -224,17 +243,18 @@ export class MemoryAdapter<
     data: PatchData,
     params: ServiceParams = {} as ServiceParams
   ): Promise<Result | Result[]> {
+    await this.load()
     if (id === null && !this.allowsMulti('patch', params)) {
       throw new MethodNotAllowed('Can not patch multiple entries')
     }
 
     const { query } = this.getQuery(params)
-    const patchEntry = (entry: Result) => {
+    const patchEntry = async (entry: Result) => {
       const currentId = (entry as any)[this.id]
 
-      this.store[currentId] = _.extend(this.store[currentId], _.omit(data, this.id))
+      this.db.data[currentId] = _.extend(this.db.data[currentId], _.omit(data, this.id))
 
-      return _select(this.store[currentId], params, this.id)
+      return _select(this.db.data[currentId], params, this.id)
     }
 
     if (id === null) {
@@ -242,17 +262,21 @@ export class MemoryAdapter<
         ...params,
         query
       })
-
-      return entries.map(patchEntry)
+      const result = Promise.all(entries.map(patchEntry)) 
+      await this.db.write()
+      return result
     }
 
-    return patchEntry(await this._get(id, params)) // Will throw an error if not found
+    const result = patchEntry(await this._get(id, params)) // Will throw an error if not found
+    await this.db.write()
+    return result
   }
 
   async _remove(id: null, params?: ServiceParams): Promise<Result[]>
   async _remove(id: Id, params?: ServiceParams): Promise<Result>
   async _remove(id: NullableId, _params?: ServiceParams): Promise<Result | Result[]>
   async _remove(id: NullableId, params: ServiceParams = {} as ServiceParams): Promise<Result | Result[]> {
+    await this.load()
     if (id === null && !this.allowsMulti('remove', params)) {
       throw new MethodNotAllowed('Can not remove multiple entries')
     }
@@ -270,8 +294,8 @@ export class MemoryAdapter<
 
     const entry = await this._get(id, params)
 
-    delete this.store[id]
-
+    delete this.db.data[id]
+    await this.db.write()
     return entry
   }
 }
