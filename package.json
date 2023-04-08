@@ -42,7 +42,7 @@
     "pack": "echo 'Skipping pack.'",
     "upstream-pack": "npm pack --pack-destination ../generators/test/build",
     "compile": "shx rm -rf lib/ && tsc && npm run pack",
-    "test": "NODE_OPTIONS='--loader ts-node/esm' mocha --config .mocharc.json --recursive test/**/*.test.ts",
+    "test": "NODE_OPTIONS='--loader ts-node/esm' npx mocha --config .mocharc.json --recursive test/**/*.test.ts",
     "test-artifacts": "cat /tmp/low-*.yaml",
     "example-vanilla": "ts-node --esm examples/vanilla.ts"
   },
