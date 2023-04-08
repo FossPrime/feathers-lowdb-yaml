@@ -77,7 +77,7 @@ export class MemoryAdapter<
       ...options
     })
     this._uId = this.options.startId
-    this.filename = this.options.filename || `${tmpdir()}/${(new Date()).toISOString()}-${Math.random() * 9**9 | 0}.yaml`
+    this.filename = this.options.filename || `${tmpdir()}/low-${(new Date()).toISOString()}-${Math.random() * 9**9 | 0}.yaml`
     this.adapter = new YAMLFile(this.filename)
     this.db = new Low(this.adapter)
     this.store = { ...this.options.store }
