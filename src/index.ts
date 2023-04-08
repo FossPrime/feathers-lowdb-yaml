@@ -428,7 +428,7 @@ export class LowDBService<
   }
 }
 
-export function memory<T = any, D = Partial<T>, P extends Params = Params>(
+export function yaml<T = any, D = Partial<T>, P extends Params = Params>(
   options: Partial<LowDBServiceOptions<T>> = {}
 ) {
   return new LowDBService<T, D, P>(options)
