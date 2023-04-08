@@ -4,6 +4,6 @@
   "reporter": "Dot",
   "extension": ".test.ts",
   "exit": true,
-  "loader": "tsx"
+  "loader": "tsx",
   "x-loader": "ts-node/esm"
 }
