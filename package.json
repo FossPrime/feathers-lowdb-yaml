@@ -2,10 +2,10 @@
   "name": "feathers-yaml",
   "description": "An in memory service store",
   "type": "module",
-  "version": "0.12.0",
+  "version": "0.14.0",
   "homepage": "https://github.com/feathersjs/feathers",
-  "main": "lib/",
-  "types": "lib/",
+  "main": "lib/src",
+  "types": "lib/src",
   "keywords": [
     "feathers",
     "feathers-plugin"
