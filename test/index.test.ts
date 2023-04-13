@@ -1,13 +1,11 @@
 import assert from 'assert'
-import adapterTests from '@feathersjs/adapter-tests'
+import { adapterTests } from '@feathersjs/adapter-tests'
 import errors from '@feathersjs/errors'
 import { feathers } from '@feathersjs/feathers'
 
 import { LowDBService } from '../src/index.js'
 
-const testSuite = (
-  typeof adapterTests === 'function' ? adapterTests : adapterTests.default
-)([
+const testSuite = adapterTests([
   '.options',
   '.events',
   '._get',
