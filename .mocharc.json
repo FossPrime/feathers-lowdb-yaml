@@ -3,5 +3,6 @@
   "require": ["ts-node/register", "source-map-support/register.js"],
   "reporter": "Dot",
   "extension": ".test.ts",
-  "exit": true
+  "exit": true,
+  "loader": "ts-node/esm"
 }
