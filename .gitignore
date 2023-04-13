@@ -131,6 +131,7 @@ dist
 
 # Replit BS
 node_modules/
+/.breakpoints
 
 # Feathers-LowDB Custom
 /lib
