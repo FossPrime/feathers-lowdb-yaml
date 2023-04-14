@@ -12,7 +12,7 @@ import sift from 'sift'
 import { NullableId, Id, Params, Paginated } from '@feathersjs/feathers'
 import { Low } from 'lowdb'
 import type { Adapter } from 'lowdb'
-import { TextFile } from 'lowdb/node'
+import { TextFile, JSONFile } from 'lowdb/node'
 import YAML from 'yaml'
 import { tmpdir } from 'node:os'
 
@@ -56,16 +56,25 @@ const _select = (data: any, params: any, ...args: string[]) => {
   return base(JSON.parse(JSON.stringify(data)))
 }
 
+const genTempName = () => 
+  `${tmpdir()}/low-${new Date().toISOString()}-${(Math.random() * 9 ** 9) | 0 }`
 
 export function yaml<T = any>(
   options: Partial<LowDBServiceOptions<T>> = {}
 ) {
   const filename =
       options.filename ||
-      `${tmpdir()}/low-${new Date().toISOString()}-${
-        (Math.random() * 9 ** 9) | 0
-      }.yaml`
+      genTempName + '.yaml'
   return new YAMLFile(filename)
+}
+
+export function json<T = any>(
+  options: Partial<LowDBServiceOptions<T>> = {}
+) {
+  const filename =
+      options.filename ||
+      genTempName + '.json'
+  return new JSONFile(filename)
 }
 
 export class LowDBAdapter<
