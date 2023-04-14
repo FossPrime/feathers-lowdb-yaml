@@ -56,6 +56,18 @@ const _select = (data: any, params: any, ...args: string[]) => {
   return base(JSON.parse(JSON.stringify(data)))
 }
 
+
+export function yaml<T = any>(
+  options: Partial<LowDBServiceOptions<T>> = {}
+) {
+  const filename =
+      options.filename ||
+      `${tmpdir()}/low-${new Date().toISOString()}-${
+        (Math.random() * 9 ** 9) | 0
+      }.yaml`
+  return new YAMLFile(filename)
+}
+
 export class LowDBAdapter<
   Result = any,
   Data = Partial<Result>,
@@ -83,12 +95,7 @@ export class LowDBAdapter<
       ...options,
     })
     this._uId = this.options.startId
-    this.filename =
-      this.options.filename ||
-      `${tmpdir()}/low-${new Date().toISOString()}-${
-        (Math.random() * 9 ** 9) | 0
-      }.yaml`
-    this.store = this.options.Model || new YAMLFile(this.filename)
+    this.store = this.options.Model || yaml(options)
     this.db = new Low(this.store)
   }
 
@@ -428,8 +435,3 @@ export class LowDBService<
   }
 }
 
-export function yaml<T = any, D = Partial<T>, P extends Params = Params>(
-  options: Partial<LowDBServiceOptions<T>> = {}
-) {
-  return new LowDBService<T, D, P>(options)
-}
