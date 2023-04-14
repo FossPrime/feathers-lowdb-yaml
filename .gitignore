@@ -135,5 +135,5 @@ node_modules/
 
 # Feathers-LowDB Custom
 /lib
-file.yaml
-
+/data/*.yaml
+/data/*.json

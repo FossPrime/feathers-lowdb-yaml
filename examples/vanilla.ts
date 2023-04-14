@@ -24,7 +24,7 @@ class YAMLFile {
   }
 }
 
-const adapter = new YAMLFile('file.yaml')
+const adapter = new YAMLFile('./data/vanilla.yaml')
 const db = new Low(adapter)
 
 // From https://github.com/typicode/lowdb#usage
