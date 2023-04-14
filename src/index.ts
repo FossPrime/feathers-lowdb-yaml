@@ -26,7 +26,8 @@ export interface LowDBServiceOptions<T = any> extends AdapterServiceOptions {
   startId?: number
   matcher?: (query: any) => any
   sorter?: (sort: any) => any,
-  Model?: Adapter<Record<string, any>>
+  Model?: Adapter<Record<string, any>>,
+  partition?: string
 }
 
 export class YAMLFile {
@@ -64,7 +65,7 @@ export function yaml<T = any>(
 ) {
   const filename =
       options.filename ||
-      genTempName + '.yaml'
+      genTempName() + '.yaml'
   return new YAMLFile(filename)
 }
 
@@ -73,7 +74,7 @@ export function json<T = any>(
 ) {
   const filename =
       options.filename ||
-      genTempName + '.json'
+      genTempName() + '.json'
   return new JSONFile(filename)
 }
 
@@ -93,6 +94,8 @@ export class LowDBAdapter<
   _uId: number
   filename: string // Probably unnecesary
   db: Low<Record<string, any>>
+  partition: string
+  data: Record<string, any>
 
   constructor(options: LowDBServiceOptions<Result> = {}) {
     super({
@@ -106,6 +109,7 @@ export class LowDBAdapter<
     this._uId = this.options.startId
     this.store = this.options.Model || yaml(options)
     this.db = new Low(this.store)
+    this.partition = options.partition
   }
 
   async load() {
@@ -113,6 +117,10 @@ export class LowDBAdapter<
       await this.db.read()
       this.db.data ||= {}
     }
+    if (this.partition && this.db.data[this.partition] === undefined) {
+      this.db.data[this.partition] = {}
+    }
+    this.data = this.partition ? this.db.data[this.partition] : this.db.data
   }
 
   async getEntries(_params?: ServiceParams) {
@@ -145,7 +153,7 @@ export class LowDBAdapter<
     const { paginate } = this.getOptions(params)
     const { query, filters } = this.getQuery(params)
 
-    let values = _.values(this.db.data)
+    let values = _.values(this.data)
     const total = values.length
     const hasSkip = filters.$skip !== undefined
     const hasSort = filters.$sort !== undefined
@@ -206,8 +214,8 @@ export class LowDBAdapter<
     await this.load()
     const { query } = this.getQuery(params)
 
-    if (id in this.db.data) {
-      const value = this.db.data[id]
+    if (id in this.data) {
+      const value = this.data[id]
 
       if (this.options.matcher(query)(value)) {
         return _select(value, params, this.id)
@@ -237,7 +245,7 @@ export class LowDBAdapter<
     ): Promise<Result> => {
       const id = (data as any)[this.id] || this._uId++
       const current = _.extend({}, data, { [this.id]: id })
-      this.db.data[id] = current
+      this.data[id] = current
 
       return _select(current, params, this.id) as Result
     }
@@ -273,7 +281,7 @@ export class LowDBAdapter<
     id = oldId == id ? oldId : id
 
     const result = _.extend({}, data, { [this.id]: id })
-    this.db.data[id] = result
+    this.data[id] = result
 
     await this.db.write()
     return this._get(id, params)
@@ -304,12 +312,12 @@ export class LowDBAdapter<
     const patchEntry = async (entry: Result) => {
       const currentId = (entry as any)[this.id]
 
-      this.db.data[currentId] = _.extend(
-        this.db.data[currentId],
+      this.data[currentId] = _.extend(
+        this.data[currentId],
         _.omit(data, this.id)
       )
 
-      return _select(this.db.data[currentId], params, this.id)
+      return _select(this.data[currentId], params, this.id)
     }
 
     if (id === null) {
@@ -359,7 +367,7 @@ export class LowDBAdapter<
 
     const entry = await this._get(id, params)
 
-    delete this.db.data[id]
+    delete this.data[id]
     await this.db.write()
     return entry
   }
