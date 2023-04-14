@@ -11,6 +11,7 @@ import {
 import sift from 'sift'
 import { NullableId, Id, Params, Paginated } from '@feathersjs/feathers'
 import { Low } from 'lowdb'
+import type { Adapter } from 'lowdb'
 import { TextFile } from 'lowdb/node'
 import YAML from 'yaml'
 import { tmpdir } from 'node:os'
@@ -24,7 +25,8 @@ export interface LowDBServiceOptions<T = any> extends AdapterServiceOptions {
   store?: LowDBServiceStore<T>
   startId?: number
   matcher?: (query: any) => any
-  sorter?: (sort: any) => any
+  sorter?: (sort: any) => any,
+  Model?: Adapter<Record<string, any>>
 }
 
 export class YAMLFile {
@@ -66,8 +68,7 @@ export class LowDBAdapter<
   ServiceParams,
   LowDBServiceOptions<Result>
 > {
-  // store: LowDBServiceStore<Result>
-  model: YAMLFile
+  store: Adapter<Record<string, any>>
   _uId: number
   filename: string // Probably unnecesary
   db: Low<Record<string, any>>
@@ -87,9 +88,8 @@ export class LowDBAdapter<
       `${tmpdir()}/low-${new Date().toISOString()}-${
         (Math.random() * 9 ** 9) | 0
       }.yaml`
-    this.model = new YAMLFile(this.filename)
-    this.db = new Low(this.model)
-    // this.store = { ...this.options.store }
+    this.store = this.options.Model || new YAMLFile(this.filename)
+    this.db = new Low(this.store)
   }
 
   async load() {
@@ -233,7 +233,7 @@ export class LowDBAdapter<
       result = createEntry(data, params)
     }
 
-    await this.db.write()
+    this.db.write()
     return result
   }
 

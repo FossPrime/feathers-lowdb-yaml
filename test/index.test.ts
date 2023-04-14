@@ -114,7 +114,7 @@ describe('Feathers Memory Service', () => {
       age: 33,
     })
 
-    const updatedPerson: any = await people.update(person.id.toString(), person)
+    const updatedPerson = await people.update(person.id.toString(), person)
 
     assert.strictEqual(typeof updatedPerson.id, 'number')
 
@@ -199,10 +199,14 @@ describe('Feathers Memory Service', () => {
       await app.service('people').update(null, {})
       throw new Error('Should never get here')
     } catch (error: any) {
-      assert.strictEqual(
-        error.message,
-        "You can not replace multiple instances. Did you mean 'patch'?"
-      )
+      if (error instanceof Error) {
+        assert.strictEqual(
+          error.message,
+          "You can not replace multiple instances. Did you mean 'patch'?"
+        )
+      } else {
+        throw new Error('Should never get here')
+      }
     }
   })
 
