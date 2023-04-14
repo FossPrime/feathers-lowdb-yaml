@@ -28,6 +28,7 @@ export interface LowDBServiceOptions<T = any> extends AdapterServiceOptions {
   sorter?: (sort: any) => any,
   Model?: Adapter<Record<string, any>>,
   partition?: string
+  waitForDisk?: Boolean
 }
 
 export class YAMLFile {
@@ -96,6 +97,7 @@ export class LowDBAdapter<
   db: Low<Record<string, any>>
   partition: string
   data: Record<string, any>
+  waitForDisk: boolean
 
   constructor(options: LowDBServiceOptions<Result> = {}) {
     super({
@@ -110,6 +112,7 @@ export class LowDBAdapter<
     this.store = this.options.Model || yaml(options)
     this.db = new Low(this.store)
     this.partition = options.partition
+    this.waitForDisk = !!(options.waitForDisk || this.partition)
   }
 
   async load() {
@@ -257,7 +260,12 @@ export class LowDBAdapter<
       result = createEntry(data, params)
     }
 
-    this.db.write()
+    await result
+    if (this.waitForDisk) { // Be safe if fornicating
+      await this.db.write()
+    } else {
+      this.db.write()
+    }
     return result
   }
 
@@ -283,7 +291,11 @@ export class LowDBAdapter<
     const result = _.extend({}, data, { [this.id]: id })
     this.data[id] = result
 
-    await this.db.write()
+    if (this.waitForDisk) {
+      await this.db.write()
+    } else {
+      this.db.write()
+    }
     return this._get(id, params)
   }
 
@@ -320,18 +332,23 @@ export class LowDBAdapter<
       return _select(this.data[currentId], params, this.id)
     }
 
+    let result = null
     if (id === null) {
       const entries = await this.getEntries({
         ...params,
         query,
       })
-      const result = Promise.all(entries.map(patchEntry))
-      await this.db.write()
-      return result
+      result = Promise.all(entries.map(patchEntry))
+    } else {
+      result = patchEntry(await this._get(id, params)) // Will throw an error if not found
     }
 
-    const result = patchEntry(await this._get(id, params)) // Will throw an error if not found
-    await this.db.write()
+    await result
+    if (this.waitForDisk) {
+      await this.db.write()
+    } else {
+      this.db.write()
+    }
     return result
   }
 
@@ -368,7 +385,11 @@ export class LowDBAdapter<
     const entry = await this._get(id, params)
 
     delete this.data[id]
-    await this.db.write()
+    if (this.waitForDisk) {
+      await this.db.write()
+    } else {
+      this.db.write()
+    }
     return entry
   }
 }
