@@ -2,7 +2,7 @@
   "name": "feathers-yaml",
   "description": "A LowDB feathers service store with Yaml support",
   "type": "module",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "homepage": "https://github.com/feathersjs/feathers",
   "main": "lib/src",
   "types": "lib/src",
